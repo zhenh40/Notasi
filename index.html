@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NOTASI — Not Balok ke Not Angka, lengkap dengan Harmoni</title>
+  <meta name="description" content="Terjemahkan partitur not balok (MusicXML) menjadi not angka beserta harmoninya. Dihitung, bukan ditebak.">
+  <meta name="theme-color" content="#0B0B0B">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ============ CURSOR ============ -->
+  <div class="cursor" aria-hidden="true"><span class="cursor__ring"><em class="cursor__label"></em></span><span class="cursor__dot"></span></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav" id="top">
+    <a href="#top" class="nav__mark" data-cursor="Atas">NOTASI<sup>®</sup></a>
+    <p class="nav__ticker mono" aria-hidden="true"><span class="nav__pulse"></span><span id="navTicker">do = C · 4/4 · ♩ = 90</span></p>
+    <button class="nav__toggle" id="menuToggle" aria-expanded="false" aria-controls="menu" data-cursor="Buka">
+      <span class="nav__toggle-txt" data-alt="Tutup">Menu</span>
+      <span class="nav__toggle-bars"><i></i><i></i></span>
+    </button>
+  </header>
+
+  <nav class="menu" id="menu" aria-hidden="true">
+    <div class="menu__bg"></div>
+    <figure class="menu__reveal" aria-hidden="true"><img alt="" src="" data-reveal-img></figure>
+    <ol class="menu__list">
+      <li><a href="#ruang-kerja" data-img="https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=900&q=80&auto=format&fit=crop" data-cursor="Ke sana"><span class="menu__no">01</span><span class="menu__txt">Ruang Kerja</span></a></li>
+      <li><a href="#proses" data-img="https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=900&q=80&auto=format&fit=crop" data-cursor="Ke sana"><span class="menu__no">02</span><span class="menu__txt">Proses</span></a></li>
+      <li><a href="#akurasi" data-img="https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=900&q=80&auto=format&fit=crop" data-cursor="Ke sana"><span class="menu__no">03</span><span class="menu__txt">Akurasi</span></a></li>
+      <li><a href="#scan" data-img="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=900&q=80&auto=format&fit=crop" data-cursor="Ke sana"><span class="menu__no">04</span><span class="menu__txt">Dari Scan</span></a></li>
+    </ol>
+    <p class="menu__foot mono">1 = do &nbsp;·&nbsp; 0 = diam &nbsp;·&nbsp; • = oktaf &nbsp;·&nbsp; ‾ = setengah ketukan</p>
+  </nav>
+
+  <main id="smooth">
+
+    <!-- ============ HERO ============ -->
+    <section class="hero" aria-label="Pembuka">
+      <div class="hero__staff" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i>
+        <svg class="hero__notes" viewBox="0 0 1000 120" preserveAspectRatio="none">
+          <g class="hn"><ellipse cx="120" cy="84" rx="13" ry="9" transform="rotate(-20 120 84)"/><line x1="132" y1="82" x2="132" y2="10"/></g>
+          <g class="hn"><ellipse cx="300" cy="60" rx="13" ry="9" transform="rotate(-20 300 60)"/><line x1="312" y1="58" x2="312" y2="-12"/></g>
+          <g class="hn"><ellipse cx="480" cy="36" rx="13" ry="9" transform="rotate(-20 480 36)"/><line x1="468" y1="40" x2="468" y2="110"/></g>
+          <g class="hn"><ellipse cx="660" cy="72" rx="13" ry="9" transform="rotate(-20 660 72)"/><line x1="672" y1="70" x2="672" y2="0"/></g>
+          <g class="hn"><ellipse cx="840" cy="48" rx="13" ry="9" transform="rotate(-20 840 48)"/><line x1="828" y1="52" x2="828" y2="120"/></g>
+        </svg>
+        <div class="hero__digits mono"><span>1</span><span>3</span><span>5</span><span>2</span><span>4</span></div>
+      </div>
+
+      <h1 class="hero__title" aria-label="Not balok menjadi not angka">
+        <span class="hero__w hero__w--not" data-split>NOT</span>
+        <span class="hero__w hero__w--balok" data-split>BALOK</span>
+        <span class="hero__w hero__w--angka"><em>jadi angka.</em></span>
+      </h1>
+
+      <figure class="hero__frame">
+        <img src="https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=1400&q=80&auto=format&fit=crop" alt="Lembar partitur di atas piano, cahaya redup" loading="eager">
+        <figcaption class="mono">fig. 01 — partitur, sebelum dihitung ulang</figcaption>
+      </figure>
+
+      <p class="hero__lede">
+        <span class="mono hero__idx">(01)</span>
+        Mesin penerjemah notasi. Foto partitur piano (<b>JPG/PNG</b>) atau <b>MusicXML</b> masuk, keluar sebagai <b>not angka</b> — titik oktaf, garis ketukan, kres-mol, lirik, dan <b>harmoni</b> di atasnya. Dihitung nada demi nada, bukan ditebak.
+      </p>
+
+      <a href="#ruang-kerja" class="bigLink hero__cta" data-cursor="Mulai">
+        <span class="bigLink__txt">Mulai menerjemahkan</span><span class="bigLink__arrow">↘</span>
+      </a>
+
+      <p class="hero__side mono" aria-hidden="true">1 . 2 3 | 5 — — 0 | scroll</p>
+    </section>
+
+    <!-- ============ MARQUEE ============ -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee__track">
+        <span>do <b>1</b></span><span>re <b>2</b></span><span>mi <b>3</b></span><span>fa <b>4</b></span><span>sol <b>5</b></span><span>la <b>6</b></span><span>si <b>7</b></span><span>diam <b>0</b></span>
+        <span>do <b>1</b></span><span>re <b>2</b></span><span>mi <b>3</b></span><span>fa <b>4</b></span><span>sol <b>5</b></span><span>la <b>6</b></span><span>si <b>7</b></span><span>diam <b>0</b></span>
+      </div>
+    </div>
+
+    <!-- ============ RUANG KERJA ============ -->
+    <section class="work" id="ruang-kerja" aria-label="Ruang kerja konverter">
+      <aside class="work__rail">
+        <p class="work__num" aria-hidden="true">02</p>
+        <h2 class="work__title" data-reveal>Ruang<br><em>kerja</em></h2>
+
+        <figure class="review" id="reviewFig" hidden>
+          <div class="review__bar mono"><span>Gambar asli</span><button type="button" data-zoom="-1" data-cursor="Perkecil">−</button><button type="button" data-zoom="1" data-cursor="Perbesar">+</button></div>
+          <div class="review__scroll"></div>
+        </figure>
+
+        <div class="ctrl" id="controls" hidden>
+          <div class="ctrl__grp ctrl__review">
+            <button type="button" class="ctrl__reviewBtn" id="reviewBtn" aria-pressed="false" data-cursor="Periksa"><span class="ctrl__review-txt">Mode periksa &amp; koreksi</span></button>
+            <p class="ctrl__prog mono" id="reviewProg"></p>
+            <p class="ctrl__hint">Klik angka untuk mengoreksi nada, tanda, oktaf atau durasi. Klik nomor birama untuk menandai <i>sudah dicek</i>.</p>
+            <button type="button" class="ctrl__link" id="undoBtn" disabled data-cursor="Urungkan">↶ Urungkan koreksi (Ctrl+Z)</button>
+          </div>
+          <fieldset class="ctrl__grp">
+            <legend class="mono">Lagu minor ditulis</legend>
+            <label><input type="radio" name="minor" value="la" checked><span>la-based <small>(do = mayor relatif)</small></span></label>
+            <label><input type="radio" name="minor" value="do"><span>do-based <small>(tonika = 1)</small></span></label>
+          </fieldset>
+          <fieldset class="ctrl__grp">
+            <legend class="mono">Harmoni</legend>
+            <label><input type="radio" name="harm" value="auto" checked><span>otomatis</span></label>
+            <label><input type="radio" name="harm" value="score"><span>hanya dari partitur</span></label>
+            <label><input type="radio" name="harm" value="analysis"><span>analisis nada</span></label>
+            <label><input type="radio" name="harm" value="off"><span>sembunyikan</span></label>
+          </fieldset>
+          <fieldset class="ctrl__grp">
+            <legend class="mono">Tulis akor sebagai</legend>
+            <label><input type="radio" name="chord" value="all" checked><span>huruf + romawi</span></label>
+            <label><input type="radio" name="chord" value="symbol"><span>huruf (G, Em, D7)</span></label>
+            <label><input type="radio" name="chord" value="number"><span>angka (1, 6m, 5⁷)</span></label>
+            <label><input type="radio" name="chord" value="roman"><span>romawi (I, vi, V7)</span></label>
+          </fieldset>
+          <div class="ctrl__grp ctrl__grp--row">
+            <span class="mono">Ukuran</span>
+            <button type="button" class="ctrl__mini" data-size="-1" data-cursor="Kecil">A−</button>
+            <button type="button" class="ctrl__mini" data-size="1" data-cursor="Besar">A+</button>
+          </div>
+          <div class="ctrl__grp ctrl__grp--row">
+            <label class="mono" for="tempo">♩ =</label>
+            <input type="range" id="tempo" min="40" max="200" value="90">
+            <output id="tempoOut" class="mono">90</output>
+          </div>
+          <button type="button" class="ctrl__play" id="playBtn" data-cursor="Putar"><span class="ctrl__play-ico"></span><span class="ctrl__play-txt">Dengarkan hasil</span></button>
+          <button type="button" class="ctrl__link" id="printBtn" data-cursor="Cetak">Cetak / simpan PDF ↗</button>
+          <button type="button" class="ctrl__link" id="resetBtn" data-cursor="Ganti">Ganti partitur ↺</button>
+        </div>
+      </aside>
+
+      <div class="work__stage">
+        <label class="drop" id="drop" data-cursor="Pilih berkas">
+          <input type="file" id="file" multiple accept="image/jpeg,image/png,.jpg,.jpeg,.png,.musicxml,.xml,.mxl,application/vnd.recordare.musicxml+xml,application/vnd.recordare.musicxml">
+          <span class="drop__corner drop__corner--tl"></span><span class="drop__corner drop__corner--br"></span>
+          <span class="drop__big">Lempar<br>partitur<em>mu</em><br>ke sini.</span>
+          <span class="drop__meta mono">foto / scan partitur piano <b>.jpg .png</b> &nbsp;·&nbsp; atau MusicXML <b>.musicxml .mxl</b> — boleh beberapa halaman sekaligus · hasilnya langsung dibuka di mode periksa</span>
+        </label>
+        <p class="work__alt">
+          atau <button type="button" class="inlineLink" id="demoBtn" data-cursor="Coba">buka partitur demo <i>“Senja di Pelabuhan”</i></button>
+        </p>
+        <p class="notice" id="notice" role="status" hidden></p>
+
+        <article class="out" id="out" hidden>
+          <header class="out__head">
+            <h3 class="out__title" id="outTitle"></h3>
+            <p class="out__composer mono" id="outComposer"></p>
+            <dl class="out__meta mono" id="outMeta"></dl>
+          </header>
+          <ul class="out__legend mono" id="outLegend"></ul>
+          <div class="out__sheet" id="sheet"></div>
+          <p class="out__foot mono" id="outFoot"></p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ PROSES (horizontal) ============ -->
+    <section class="proc" id="proses" aria-label="Cara kerja">
+      <div class="proc__pin">
+        <h2 class="proc__head"><span>Empat</span> <em>langkah,</em> <span class="proc__head-o">nol tebakan</span></h2>
+        <div class="proc__track">
+          <article class="step step--a">
+            <span class="step__n" aria-hidden="true">1</span>
+            <h3 class="step__t">Baca <em>ejaan</em> nada</h3>
+            <p>Huruf, kres/mol, dan oktaf diambil persis dari MusicXML. F♯ tetap F♯, G♭ tetap G♭ — enharmonik tidak pernah tertukar, karena angka dihitung dari jarak <i>huruf</i>, bukan dari tuts piano.</p>
+            <pre class="step__code mono">F♯4 → huruf F, alter +1
+kunci G mayor → F sudah ♯
+hasil: <b>7</b>  (tanpa tanda)</pre>
+          </article>
+          <article class="step step--b">
+            <span class="step__n" aria-hidden="true">2</span>
+            <h3 class="step__t">Tentukan <em>do</em> &amp; oktaf</h3>
+            <p>Angka 1 mengikuti tanda kunci. Oktaf acuan dipilih per baris agar titik oktaf sesedikit mungkin, lalu ditulis eksplisit: <span class="mono">1 = G4</span>.</p>
+            <div class="step__scale mono" aria-hidden="true"><span>5<i class="dn">•</i></span><span>6<i class="dn">•</i></span><span>7<i class="dn">•</i></span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>1<i class="up">•</i></span></div>
+          </article>
+          <article class="step step--c">
+            <span class="step__n" aria-hidden="true">3</span>
+            <h3 class="step__t">Ketukan dengan <em>pecahan</em> eksak</h3>
+            <p>Durasi dihitung sebagai bilangan rasional, bukan desimal. Not dipecah tepat di batas ketukan, garis bawah digabung per ketukan, sinkop dan triol tetap utuh.</p>
+            <pre class="step__code mono">♩.  ♪   →  1 <u>. 2</u>
+♪ ♩  ♪  →  <u>1 2</u> <u>. 3</u></pre>
+          </article>
+          <article class="step step--d">
+            <span class="step__n" aria-hidden="true">4</span>
+            <h3 class="step__t">Harmoni di <em>atas</em> garis</h3>
+            <p>Simbol akor yang tertulis di partitur dibaca apa adanya. Bila tidak ada, harmoni dianalisis dari semua suara: templat akor, bobot ketukan, nada lewat, bas, dan dominan sekunder.</p>
+            <pre class="step__code mono">D7   A7      F    D7
+V7   V7/V    ♭VII V7</pre>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ AKURASI ============ -->
+    <section class="acc" id="akurasi" aria-label="Tentang akurasi">
+      <p class="acc__kicker mono" data-reveal>(03) — terus terang</p>
+      <h2 class="acc__big" data-reveal>Yang dihitung<br><em>selalu</em> tepat.<br><span>Yang dilihat mesin</span><br><span>perlu matamu.</span></h2>
+      <div class="acc__cols">
+        <div class="acc__col acc__col--yes" data-reveal>
+          <h3>Pasti 1:1 dengan berkas</h3>
+          <p>Angka, kres/mol, titik oktaf, panjang ketukan, ikatan, triol, lirik, pergantian tangga nada, dan simbol akor yang tertulis. Diuji otomatis — <span class="mono" id="testCount">16/16</span> kasus lulus.</p>
+        </div>
+        <div class="acc__col acc__col--maybe" data-reveal>
+          <h3>Perlu diperiksa</h3>
+          <p>Pembacaan gambar (OMR) oleh mesin mana pun tidak bisa dijamin 100%. Karena itu ada <i>mode periksa</i>: gambar asli di samping hasil, birama yang jumlah ketukannya janggal ditandai ⚠, setiap angka bisa diklik untuk dikoreksi, dan tiap birama dicentang setelah dicek. Harmoni hasil <i>analisis</i> (garis putus-putus) adalah tafsiran musikal.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DARI SCAN ============ -->
+    <section class="scan" id="scan" aria-label="Dari scan ke MusicXML">
+      <h2 class="scan__title" data-reveal>Dari foto<br>ke angka<em>.</em></h2>
+      <p class="scan__lede" data-reveal>Gambar JPG/PNG dibaca mesin <b>Audiveris</b> di server NOTASI, lalu dibuka di layar periksa berdampingan dengan gambar aslinya. Hasil terbaik: scan/foto tegak, terang merata, setara 300 dpi, satu halaman per gambar. Aplikasi lain yang bisa mengekspor MusicXML juga bisa dipakai:</p>
+      <figure class="scan__reveal" aria-hidden="true"><img alt="" src="" data-scan-img></figure>
+      <ul class="scan__list">
+        <li><a href="https://audiveris.github.io/audiveris/" target="_blank" rel="noopener" data-img="https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80&auto=format&fit=crop" data-cursor="Buka"><span class="scan__name">Audiveris</span><span class="scan__how mono">gratis · open source · PDF/gambar → .mxl</span></a></li>
+        <li><a href="https://musescore.org/" target="_blank" rel="noopener" data-img="https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=800&q=80&auto=format&fit=crop" data-cursor="Buka"><span class="scan__name">MuseScore</span><span class="scan__how mono">impor PDF · Ekspor → MusicXML</span></a></li>
+        <li><a href="https://www.playscore.co/" target="_blank" rel="noopener" data-img="https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=800&q=80&auto=format&fit=crop" data-cursor="Buka"><span class="scan__name">PlayScore 2</span><span class="scan__how mono">kamera ponsel · bagikan sebagai MusicXML</span></a></li>
+        <li><a href="https://www.musitek.com/" target="_blank" rel="noopener" data-img="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80&auto=format&fit=crop" data-cursor="Buka"><span class="scan__name">SmartScore</span><span class="scan__how mono">OMR profesional · ekspor MusicXML</span></a></li>
+      </ul>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="foot">
+      <p class="foot__giant" aria-hidden="true">1 . 2 3 <span>|</span> 5 —</p>
+      <div class="foot__row mono">
+        <span>NOTASI® — not balok → not angka + harmoni</span>
+        <a href="#top" class="inlineLink" data-cursor="Naik">kembali ke atas ↑</a>
+        <span>foto: Unsplash</span>
+      </div>
+    </footer>
+  </main>
+
+  <script src="vendor/gsap.min.js"></script>
+  <script src="vendor/ScrollTrigger.min.js"></script>
+  <script src="vendor/lenis.min.js"></script>
+  <script src="js/theory.js"></script>
+  <script src="js/musicxml.js"></script>
+  <script src="js/harmony.js"></script>
+  <script src="js/convert.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/vision.js"></script>
+  <script src="js/demo.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
