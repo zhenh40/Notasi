@@ -1,0 +1,14 @@
+# Deploy sekali klik di Render: New + > Blueprint > pilih repo ini.
+services:
+  - type: web
+    name: notasi
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/omr/status
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false          # isi di dasbor Render (rahasia, jangan di-commit)
+      - key: NOTASI_ACCESS_CODE
+        sync: false          # opsional: kode yang harus dimasukkan pengunjung
+      - key: NOTASI_RATE_LIMIT
+        value: "20"

@@ -208,5 +208,35 @@ If a staff has two voices with different rhythms, write the upper voice for rh /
     return Object.assign(buildPianoXML(data), { data });
   }
 
-  root.NotasiVision = { available, readImages, buildPianoXML, parseToken, PROMPT };
+  /* ---------- jalur server sendiri: /api/vision (Claude API dengan key di server) ---------- */
+  function blobToBase64(blob) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(String(r.result).split(',')[1]);
+      r.onerror = () => rej(new Error('Gagal membaca gambar.'));
+      r.readAsDataURL(blob);
+    });
+  }
+
+  async function readImagesViaServer(url, files, accessCode, signal) {
+    const images = [];
+    for (const f of files) {
+      let b = await prepareImage(f);
+      if (b.size > 4.8 * 1024 * 1024) b = await prepareImage(f, 1800);
+      images.push({ media_type: b.type || 'image/jpeg', data: await blobToBase64(b) });
+    }
+    const r = await fetch(url, {
+      method: 'POST', signal,
+      headers: { 'Content-Type': 'application/json', 'X-Access-Code': accessCode || '' },
+      body: JSON.stringify({ images })
+    });
+    let j = null;
+    try { j = await r.json(); } catch (e) { /* bukan JSON */ }
+    if (!r.ok) throw Object.assign(new Error((j && j.error) || ('Server mengembalikan ' + r.status)), { status: r.status, needsCode: !!(j && j.needsCode) });
+    if (j.truncated) throw new Error('Partitur terlalu panjang untuk sekali baca. Unggah per halaman.');
+    const data = extractJSON(j.text);
+    return Object.assign(buildPianoXML(data), { data });
+  }
+
+  root.NotasiVision = { available, readImages, readImagesViaServer, buildPianoXML, parseToken, PROMPT };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -167,12 +167,13 @@
   /* ---------- OMR: gambar JPG/PNG -> MusicXML lewat server Audiveris ---------- */
   const OMR_URL = (window.NOTASI_OMR_URL || 'api/omr').replace(/\/$/, '');
   let omrAvailable = null;
+  let serverStatus = {};
   async function checkOmr() {
     try {
       const r = await fetch(OMR_URL + '/status', { cache: 'no-store' });
-      const j = await r.json();
-      omrAvailable = !!j.available;
-    } catch (e) { omrAvailable = false; }
+      serverStatus = await r.json();
+      omrAvailable = !!serverStatus.available;
+    } catch (e) { omrAvailable = false; serverStatus = {}; }
     document.documentElement.classList.toggle('omr-on', omrAvailable);
     return omrAvailable;
   }
@@ -192,6 +193,40 @@
       urls.forEach(u => URL.revokeObjectURL(u));
       showNotice('<b>Gambar tidak berhasil dibaca.</b> ' + escapeHtml(err.message || err) + '<br>Tips: foto tegak lurus, terang merata, tidak miring/terlipat, resolusi tinggi (setara scan 300 dpi).', true);
     };
+
+    // Jalur 1 (website yang kamu deploy): server membaca foto lewat Claude API
+    if (serverStatus.vision) {
+      if (visionAbort) visionAbort.abort();
+      visionAbort = new AbortController();
+      const t0 = Date.now();
+      const msg = () => showNotice(`<b>Membaca ${files.length > 1 ? files.length + ' halaman' : 'partitur'} dari gambar…</b> <span class="omr-spin"></span> ${Math.round((Date.now() - t0) / 1000)} dtk<br><span class="mono">biasanya 1–3 menit · setelahnya layar periksa terbuka di samping gambar</span>`);
+      msg();
+      const timer = setInterval(msg, 1000);
+      let code = '';
+      try { code = localStorage.getItem('notasi-code') || ''; } catch (e) { /* penyimpanan tidak tersedia */ }
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (serverStatus.needsCode && !code) {
+          code = window.prompt('Masukkan kode akses NOTASI:') || '';
+          if (!code) { clearInterval(timer); showNotice('Pembacaan dibatalkan (kode akses belum diisi).', true); return; }
+        }
+        try {
+          const { xml, problems } = await NotasiVision.readImagesViaServer('api/vision', files, code, visionAbort.signal);
+          clearInterval(timer);
+          try { if (code) localStorage.setItem('notasi-code', code); } catch (e) { /* abaikan */ }
+          load(xml, { images: urls, fromImage: true });
+          if (problems.length) showNotice('<b>Beberapa simbol tidak terbaca dan dilewati:</b><br>' + problems.slice(0, 6).map(escapeHtml).join('<br>') + '<br>Periksa birama tersebut di mode periksa.', true);
+          return;
+        } catch (err) {
+          if (err && err.needsCode) { code = ''; try { localStorage.removeItem('notasi-code'); } catch (e) { /* abaikan */ } serverStatus.needsCode = true; continue; }
+          clearInterval(timer);
+          fail(err);
+          return;
+        }
+      }
+      clearInterval(timer);
+      showNotice('Kode akses salah.', true);
+      return;
+    }
 
     if (omrAvailable) {
       if (files.length > 1) showNotice('<b>Server Audiveris membaca satu gambar per kali</b> — halaman pertama yang diproses.');

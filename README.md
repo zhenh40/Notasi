@@ -4,7 +4,33 @@ Website statis (HTML + CSS + JavaScript murni, GSAP + ScrollTrigger + Lenis dise
 Partitur **MusicXML** (`.musicxml`, `.xml`, `.mxl`) diterjemahkan menjadi **not angka** lengkap dengan
 harmoni (simbol akor + angka romawi / angka akor). Semua proses berjalan di browser; berkas tidak diunggah ke mana pun.
 
-## Dari foto JPG/PNG (piano)
+## Deploy ke website sendiri (foto JPG/PNG jalan di mana saja)
+
+Website ini butuh **server kecil** (bukan hosting statis saja), karena foto dibaca oleh Claude lewat API key
+milikmu yang disimpan di server — key tidak pernah sampai ke browser pengunjung.
+
+1. Buat API key di <https://platform.claude.com> (berbayar per pemakaian; satu halaman partitur kira-kira beberapa sen
+   sampai belasan sen dolar, tergantung kepadatan partitur).
+2. Unggah folder ini ke repo GitHub.
+3. **Render** (paling mudah): New + → Blueprint → pilih repo → isi `ANTHROPIC_API_KEY` → Deploy (`render.yaml` sudah ada).
+   **Railway / Fly.io / VPS**: deploy `Dockerfile`, set variabel `ANTHROPIC_API_KEY`. Tanpa Docker:
+   ```bash
+   pip install -r requirements.txt
+   ANTHROPIC_API_KEY=... python3 server/omr_server.py --port 8000
+   ```
+
+Pengaman agar kredit API tidak dihabiskan orang lain:
+
+| Variabel | Fungsi |
+|---|---|
+| `NOTASI_ACCESS_CODE` | bila diisi, pengunjung harus memasukkan kode ini sebelum membaca foto |
+| `NOTASI_RATE_LIMIT` | maksimal baca foto per alamat IP per jam (default 20) |
+| `NOTASI_MAX_IMAGES` | maksimal halaman sekali baca (default 8) |
+| `NOTASI_MODEL` | model Claude (default `claude-opus-5-5`) |
+
+Urutan pembaca foto yang dipakai otomatis: server Claude API (`/api/vision`) → Audiveris (`Dockerfile.audiveris`)
+→ Claude di dalam artifact claude.ai.
+
 
 Ada dua mesin pembaca gambar; NOTASI memakai yang tersedia:
 
@@ -15,11 +41,11 @@ Ada dua mesin pembaca gambar; NOTASI memakai yang tersedia:
 
 
 Gambar dibaca oleh **Audiveris 5.4.1** (OMR open source) yang berjalan di server kecil `server/omr_server.py`.
-Cara termudah: Docker (membangun Audiveris dari sumbernya, butuh ±10 menit sekali saja).
+Alternatif gratis tanpa API key: Docker dengan Audiveris (membangun dari sumbernya, ±10 menit sekali saja).
 
 ```bash
-docker build -t notasi .
-docker run -p 8000:8000 notasi
+docker build -f Dockerfile.audiveris -t notasi-audiveris .
+docker run -p 8000:8000 notasi-audiveris
 ```
 
 Buka <http://localhost:8000>, unggah foto/scan partitur piano. Hasilnya terbuka di **mode periksa**:
@@ -112,8 +138,11 @@ js/render.js        model not angka → DOM
 js/player.js        pemutar Web Audio + sorotan not
 js/editor.js        koreksi not (mode periksa)
 js/vision.js        foto → transkripsi Claude → MusicXML piano
-server/omr_server.py  server statis + /api/omr (Audiveris)
-Dockerfile          NOTASI + Audiveris dalam satu image
+server/omr_server.py  server statis + /api/omr (Audiveris) + /api/vision
+server/vision_api.py  pembaca foto via Claude API (kode akses, batas pemakaian)
+Dockerfile          image ringan untuk deploy web (Claude API)
+Dockerfile.audiveris  image dengan Audiveris (tanpa API key)
+render.yaml         deploy sekali klik di Render
 js/demo.js          partitur demo orisinal “Senja di Pelabuhan”
 js/main.js          interaksi situs + ruang kerja
 vendor/             gsap, ScrollTrigger, lenis

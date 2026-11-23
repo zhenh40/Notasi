@@ -21,10 +21,13 @@ import os
 import shutil
 import subprocess
 import tempfile
+import sys
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import vision_api  # noqa: E402
 AUDIVERIS = os.environ.get('AUDIVERIS', 'audiveris')
 MOCK = os.environ.get('NOTASI_OMR_MOCK')
 MAX_BYTES = 25 * 1024 * 1024
@@ -81,14 +84,26 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.split('?')[0] == '/api/omr/status':
             exe = engine_path()
-            return self._json(200, {'available': bool(exe or MOCK),
-                                    'engine': 'mock' if MOCK and not exe else ('audiveris' if exe else None)})
+            return self._json(200, dict({'available': bool(exe or MOCK),
+                                         'engine': 'mock' if MOCK and not exe else ('audiveris' if exe else None)},
+                                        **vision_api.status()))
         # jangan sajikan folder pengujian / server
         if self.path.startswith(('/server', '/tests', '/.')):
             return self._json(404, {'error': 'not found'})
         return super().do_GET()
 
+    def client_ip(self):
+        # di balik proxy hosting (Render, Railway, Fly) alamat asli ada di X-Forwarded-For
+        fwd = self.headers.get('X-Forwarded-For', '')
+        return fwd.split(',')[0].strip() or self.client_address[0]
+
     def do_POST(self):
+        if self.path.split('?')[0] == '/api/vision':
+            length = int(self.headers.get('Content-Length') or 0)
+            if length <= 0 or length > 45 * 1024 * 1024:
+                return self._json(413, {'error': 'Ukuran permintaan terlalu besar.'})
+            code, obj = vision_api.handle(self.rfile.read(length), self.client_ip(), self.headers.get('X-Access-Code', ''))
+            return self._json(code, obj)
         if self.path.split('?')[0] != '/api/omr':
             return self._json(404, {'error': 'not found'})
         length = int(self.headers.get('Content-Length') or 0)
@@ -135,10 +150,11 @@ class Handler(SimpleHTTPRequestHandler):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--host', default='0.0.0.0')
-    ap.add_argument('--port', type=int, default=8000)
+    ap.add_argument('--port', type=int, default=int(os.environ.get('PORT', '8000')))
     a = ap.parse_args()
     exe = engine_path()
-    print(f'NOTASI di http://{a.host}:{a.port}  ·  OMR: {exe or ("MOCK " + MOCK if MOCK else "tidak aktif")}')
+    print(f'NOTASI di http://{a.host}:{a.port}  ·  Audiveris: {exe or ("MOCK " + MOCK if MOCK else "tidak aktif")}'
+          f'  ·  Claude: {"aktif (" + vision_api.status()["model"] + ")" if vision_api.available() else "tidak aktif (ANTHROPIC_API_KEY kosong)"}')
     ThreadingHTTPServer((a.host, a.port), Handler).serve_forever()
 
 
