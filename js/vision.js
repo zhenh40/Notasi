@@ -87,7 +87,7 @@ If a staff has two voices with different rhythms, write the upper voice for rh /
     out.push('<part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list><part id="P1">');
 
     // ikatan lintas birama: alterasi not yang diikat terbawa ke birama berikutnya
-    const tieCarry = { 1: {}, 2: {} };
+    const tieCarry = { '1': {}, '2': {}, '5': {}, '6': {} };
 
     measures.forEach((m, mi) => {
       const changed = mi === 0 || m.fifths !== undefined || m.beats !== undefined;
@@ -100,12 +100,16 @@ If a staff has two voices with different rhythms, write the upper voice for rh /
         out.push(`<attributes>${mi === 0 ? `<divisions>${DIV}</divisions>` : ''}<key><fifths>${fifths}</fifths><mode>${mode}</mode></key><time><beats>${beats}</beats><beat-type>${beatType}</beat-type></time>${mi === 0 ? '<staves>2</staves><clef number="1"><sign>G</sign><line>2</line></clef><clef number="2"><sign>F</sign><line>4</line></clef>' : ''}</attributes>`);
         if (mi === 0) out.push(`<direction placement="above"><direction-type><metronome><beat-unit>quarter</beat-unit><per-minute>${tempo}</per-minute></metronome></direction-type><sound tempo="${tempo}"/></direction>`);
       }
-      let staff1Len = 0;
-      [['rh', 1, '1'], ['lh', 2, '5']].forEach(([field, staff, voice], si) => {
+      let prevLen = 0, first = true;
+      const accByStaff = { 1: {}, 2: {} };   // tanda kromatis berlaku per paranada sampai akhir birama
+      [['rh', 1, '1'], ['rh2', 1, '2'], ['lh', 2, '5'], ['lh2', 2, '6']].forEach(([field, staff, voice]) => {
+        const optional = field.endsWith('2');
+        if (optional && !(typeof m[field] === 'string' && m[field].trim())) return;
         const raw = typeof m[field] === 'string' ? m[field].trim() : '';
-        if (si === 1 && staff1Len > 0) out.push(`<backup><duration>${staff1Len}</duration></backup>`);
-        const measAcc = {};             // "C4" -> alter yang berlaku di birama ini
-        const prevTies = tieCarry[staff];
+        if (!first && prevLen > 0) out.push(`<backup><duration>${prevLen}</duration></backup>`);
+        first = false;
+        const measAcc = accByStaff[staff]; // "C4" -> alter yang berlaku di birama ini
+        const prevTies = tieCarry[voice];
         const nextTies = {};
         let len = 0, tripCount = 0, prevTie = {};
         if (!raw) {
@@ -150,8 +154,8 @@ If a staff has two voices with different rhythms, write the upper voice for rh /
           len += t.dur;
         }
         Object.assign(nextTies, prevTie);
-        tieCarry[staff] = nextTies;
-        if (si === 0) staff1Len = len;
+        tieCarry[voice] = nextTies;
+        prevLen = len;
       });
       if (mi === measures.length - 1) out.push('<barline location="right"><bar-style>light-heavy</bar-style></barline>');
       out.push('</measure>');

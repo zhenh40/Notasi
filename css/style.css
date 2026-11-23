@@ -199,7 +199,7 @@ input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border: 0; bord
 .work__alt i { font-family: var(--f-serif); color: var(--neon); }
 .work.has-output .drop { display: none; }
 .work.has-output .work__alt { display: none; }
-.notice { margin: 3vh 0 0 6vw; padding: 18px 22px; border-left: 2px solid var(--neon); max-width: 64ch; font-size: 15px; background: var(--ink-2); }
+.notice { position: relative; z-index: 3; margin: 3vh 0 0 6vw; padding: 18px 22px; border-left: 2px solid var(--neon); max-width: 64ch; font-size: 15px; background: var(--ink-2); }
 .notice.is-error { border-color: #ff4d2e; }
 .notice b { color: var(--neon); font-weight: 600; }
 
@@ -450,3 +450,5 @@ button.m-no:hover { background: var(--ink); color: var(--sand); }
   .work.is-review .review__scroll { max-height: 45vh; }
 }
 @media print { .review, .m-warn, .ed { display: none !important; } .m--warn { background: none; } button.m-no { color: #888; } .m--ok button.m-no { background: none; } .m--ok button.m-no::after { content: ''; } }
+
+.work.has-output .notice { margin: 0 0 7vh 0; }

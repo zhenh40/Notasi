@@ -4,64 +4,43 @@ Website statis (HTML + CSS + JavaScript murni, GSAP + ScrollTrigger + Lenis dise
 Partitur **MusicXML** (`.musicxml`, `.xml`, `.mxl`) diterjemahkan menjadi **not angka** lengkap dengan
 harmoni (simbol akor + angka romawi / angka akor). Semua proses berjalan di browser; berkas tidak diunggah ke mana pun.
 
-## Deploy ke website sendiri (foto JPG/PNG jalan di mana saja)
+## Foto/scan JPG/PNG → not angka (mesin bawaan, tanpa server & tanpa AI luar)
 
-Website ini butuh **server kecil** (bukan hosting statis saja), karena foto dibaca oleh Claude lewat API key
-milikmu yang disimpan di server — key tidak pernah sampai ke browser pengunjung.
+NOTASI punya **mesin pembaca partitur (OMR) sendiri** yang berjalan sepenuhnya di browser pengunjung
+(`js/omr/`, di Web Worker). Tidak butuh server, API key, Claude, atau internet setelah halaman terbuka —
+cukup unggah folder ini ke hosting statis mana pun (GitHub Pages, Netlify, Vercel, hosting biasa) atau buka
+`index.html` langsung. Gambar tidak diunggah ke mana pun.
 
-1. Buat API key di <https://platform.claude.com> (berbayar per pemakaian; satu halaman partitur kira-kira beberapa sen
-   sampai belasan sen dolar, tergantung kepadatan partitur).
-2. Unggah folder ini ke repo GitHub.
-3. **Render** (paling mudah): New + → Blueprint → pilih repo → isi `ANTHROPIC_API_KEY` → Deploy (`render.yaml` sudah ada).
-   **Railway / Fly.io / VPS**: deploy `Dockerfile`, set variabel `ANTHROPIC_API_KEY`. Tanpa Docker:
-   ```bash
-   pip install -r requirements.txt
-   ANTHROPIC_API_KEY=... python3 server/omr_server.py --port 8000
-   ```
+Tahapannya: binerisasi adaptif → luruskan kemiringan → normalisasi ukuran → deteksi & penghapusan garis paranada
+(dilacak per segmen, tahan garis putus-putus pada foto) → grand staff piano → kunci G/F, tanda kunci, sukat →
+kepala not penuh/kosong/bulat (transformasi jarak + cetakan dari 5 font SMuFL) → tangkai, balok/bendera (dihitung
+dari ketebalan pita), titik, garis birama, tanda diam, kres/mol/pugar, tali (tie), triol → birama & suara → MusicXML.
+Aturan musik yang pasti (tanda kunci, kres/mol berlaku sampai akhir birama, tie lintas birama) dihitung, bukan ditebak.
 
-Pengaman agar kredit API tidak dihabiskan orang lain:
+### Akurasi terukur (72 gambar uji, 24 lagu piano acak, 4–5 font, kunci jawaban diketahui)
 
-| Variabel | Fungsi |
-|---|---|
-| `NOTASI_ACCESS_CODE` | bila diisi, pengunjung harus memasukkan kode ini sebelum membaca foto |
-| `NOTASI_RATE_LIMIT` | maksimal baca foto per alamat IP per jam (default 20) |
-| `NOTASI_MAX_IMAGES` | maksimal halaman sekali baca (default 8) |
-| `NOTASI_MODEL` | model Claude (default `claude-opus-5-5`) |
+| Kondisi gambar | Not tepat (nada + ketukan + durasi) | Nada saja | Birama sempurna | Tanda kunci | Sukat |
+|---|---|---|---|---|---|
+| Partitur cetak bersih | **96%** | 98% | 82% | 23/24 | 24/24 |
+| Hasil scan (miring ±1°, noise, JPEG) | **92%** | 98% | 73% | 24/24 | 24/24 |
+| Foto ponsel (miring ±2°, buram, cahaya tidak rata, resolusi rendah) | **80%** | 95% | 49% | 24/24 | 24/24 |
+| Font bergaya tulisan tangan (Petaluma) | 86% | 96% | 58% | 5/6 | 6/6 |
 
-Urutan pembaca foto yang dipakai otomatis: server Claude API (`/api/vision`) → Audiveris (`Dockerfile.audiveris`)
-→ Claude di dalam artifact claude.ai.
+**Jujur soal 100%:** tidak ada mesin pembaca foto partitur (termasuk aplikasi komersial) yang menjamin 100%.
+Karena itu hasil gambar selalu dibuka di **mode periksa** — gambar asli di samping hasil, birama yang jumlah
+ketukannya janggal ditandai ⚠, setiap angka bisa diklik untuk dikoreksi (nada, ♭/♮/♯, oktaf, durasi, titik,
+akor), Ctrl+Z, dan tiap birama dicentang setelah dicek. Setelah semua birama dicek, hasilnya 100% sesuai partitur.
 
+Tips hasil terbaik: partitur cetak (bukan tulisan tangan), foto tegak lurus dari atas, terang merata tanpa
+bayangan, fokus tajam, satu halaman per gambar, setara scan 300 dpi.
 
-Ada dua mesin pembaca gambar; NOTASI memakai yang tersedia:
+### Mesin cadangan opsional (tidak diperlukan)
 
-1. **Claude (penglihatan)** — otomatis aktif saat NOTASI dibuka sebagai artifact di claude.ai (izin “sample” dengan gambar).
-   Claude hanya menyalin yang tercetak (huruf, oktaf, tanda yang tertulis, durasi); tanda kunci, tanda kromatis yang
-   berlaku sampai akhir birama, dan ikatan lintas birama dihitung oleh `js/vision.js` secara pasti. Bisa beberapa halaman sekaligus.
-2. **Audiveris** — di server sendiri lewat Docker (di bawah).
+Bila dideploy dengan server (`server/omr_server.py`) dan diisi `ANTHROPIC_API_KEY` atau dipasang Audiveris
+(`Dockerfile.audiveris`), server itu hanya dipakai bila mesin bawaan gagal membaca gambar. Tanpa itu pun
+semua fitur berjalan. Detail: bagian *Deploy dengan server* di bawah.
 
-
-Gambar dibaca oleh **Audiveris 5.4.1** (OMR open source) yang berjalan di server kecil `server/omr_server.py`.
-Alternatif gratis tanpa API key: Docker dengan Audiveris (membangun dari sumbernya, ±10 menit sekali saja).
-
-```bash
-docker build -f Dockerfile.audiveris -t notasi-audiveris .
-docker run -p 8000:8000 notasi-audiveris
-```
-
-Buka <http://localhost:8000>, unggah foto/scan partitur piano. Hasilnya terbuka di **mode periksa**:
-
-* gambar asli di kiri (bisa diperbesar), not angka + harmoni di kanan;
-* birama yang jumlah ketukannya tidak pas ditandai **⚠ ketukan** (tanda khas salah baca OMR);
-* klik angka mana pun → ubah nada, ♭/♮/♯, oktaf, durasi, titik, tambah/hapus nada akor, jadikan diam/not; **Ctrl+Z** untuk urungkan;
-* klik nomor birama untuk mencentang *sudah dicek*; penghitung menunjukkan `n/N birama dicek`.
-
-**Soal 100%:** tidak ada mesin OMR yang bisa menjamin 100% benar dari foto. Konversi MusicXML → not angka di NOTASI
-tepat 1:1 (lihat pengujian), jadi hasil akhir 100% benar setelah semua birama dicek dan dikoreksi di mode periksa.
-
-Tanpa Docker: pasang Audiveris sendiri, lalu `AUDIVERIS=/path/ke/Audiveris python3 server/omr_server.py --port 8000`.
-Untuk mencoba tampilan tanpa Audiveris: `NOTASI_OMR_MOCK=/path/contoh.mxl python3 server/omr_server.py` (server
-mengembalikan berkas contoh itu untuk setiap gambar — hanya untuk pengujian).
-
+## Deploy dengan server (opsional)
 ## Menjalankan (tanpa pembaca gambar)
 
 Cukup buka `index.html`, atau jalankan server lokal agar semua fitur browser aktif:
@@ -110,6 +89,18 @@ node tests/core.test.js         # cetak hasil demo per birama
 node tests/vision.test.js       # 9 kasus: tanda kunci, kres/mol per birama, ikatan lintas birama, triol, birama diam, harmoni piano
 ```
 
+Uji mesin OMR (butuh Python + Verovio + Pillow, dan server statis yang melayani `/`):
+
+```bash
+pip install verovio pillow numpy
+python3 tests/omr/gen_corpus.py corpus/xml 24 7                 # lagu piano acak + kunci jawaban
+python3 tests/omr/render_corpus.py render corpus/xml corpus/img 11
+node tests/omr/rasterize.js corpus/img/jobs.json
+python3 tests/omr/render_corpus.py degrade corpus/img 13        # varian scan & foto
+python3 -m http.server 8790 --bind 127.0.0.1 --directory / &
+node tests/omr/run_eval.js corpus/img/manifest.json all 24 hasil.json
+```
+
 Uji silang terhadap korpus music21 (654 partitur MusicXML asli: Bach, Beethoven, Mozart, Haydn, Schumann, Joplin, lead sheet, dll.)
 dengan music21 sebagai acuan independen:
 
@@ -137,7 +128,8 @@ js/convert.js       model skor → model not angka
 js/render.js        model not angka → DOM
 js/player.js        pemutar Web Audio + sorotan not
 js/editor.js        koreksi not (mode periksa)
-js/vision.js        foto → transkripsi Claude → MusicXML piano
+js/vision.js        penyusun MusicXML piano dari transkripsi (dipakai mesin OMR)
+js/omr/             mesin pembaca partitur bawaan (gambar, paranada, simbol, penyusun, worker)
 server/omr_server.py  server statis + /api/omr (Audiveris) + /api/vision
 server/vision_api.py  pembaca foto via Claude API (kode akses, batas pemakaian)
 Dockerfile          image ringan untuk deploy web (Claude API)
@@ -150,3 +142,6 @@ tests/              uji ketepatan & uji silang
 ```
 
 Foto: Unsplash (dimuat langsung dari images.unsplash.com; bila gagal dimuat, tampil latar tipografis).
+
+Bentuk simbol musik di `js/omr/glyphs.js` diambil dari font SMuFL Bravura, Leland, Petaluma (© Steinberg/
+MuseScore, SIL Open Font License 1.1), Leipzig dan Gootville (SIL OFL 1.1), lewat paket Verovio.

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>OMR harness</title></head>
+<body>
+<script src="/home/user/notasi/js/omr/glyphs.js"></script>
+<script src="/home/user/notasi/js/omr/omr-image.js"></script>
+<script src="/home/user/notasi/js/omr/omr-staff.js"></script>
+<script src="/home/user/notasi/js/omr/omr-symbols.js"></script>
+<script src="/home/user/notasi/js/omr/omr-assemble.js"></script>
+<script src="/home/user/notasi/js/omr/omr.js"></script>
+<script src="/home/user/notasi/js/theory.js"></script>
+<script src="/home/user/notasi/js/musicxml.js"></script>
+<script src="/home/user/notasi/js/harmony.js"></script>
+<script src="/home/user/notasi/js/convert.js"></script>
+<script src="/home/user/notasi/js/vision.js"></script>
+<script>
+  // utilitas uji: muat gambar dari URL -> abu-abu
+  async function loadGray(url) {
+    const blob = await (await fetch(url)).blob();
+    const bmp = await createImageBitmap(blob);
+    const c = new OffscreenCanvas(bmp.width, bmp.height);
+    const g = c.getContext('2d');
+    g.drawImage(bmp, 0, 0);
+    const d = g.getImageData(0, 0, bmp.width, bmp.height);
+    return { gray: NotasiOMRImage.toGray(d.data, bmp.width, bmp.height), w: bmp.width, h: bmp.height };
+  }
+  // gambar debug: biner (abu muda) + overlay
+  async function debugPNG(prep, draw) {
+    const { w, h } = prep;
+    const c = new OffscreenCanvas(w, h);
+    const g = c.getContext('2d');
+    const id = g.createImageData(w, h);
+    const src = prep.debugImg || prep.bin;
+    for (let i = 0; i < w * h; i++) {
+      const v = src[i] ? 90 : 255;
+      id.data[i * 4] = id.data[i * 4 + 1] = id.data[i * 4 + 2] = v; id.data[i * 4 + 3] = 255;
+    }
+    g.putImageData(id, 0, 0);
+    draw && draw(g);
+    const blob = await c.convertToBlob({ type: 'image/png' });
+    const buf = new Uint8Array(await blob.arrayBuffer());
+    let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+    return btoa(s);
+  }
+</script>
+</body></html>

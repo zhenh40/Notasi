@@ -208,11 +208,11 @@ V7   V7/V    ♭VII V7</pre>
       <div class="acc__cols">
         <div class="acc__col acc__col--yes" data-reveal>
           <h3>Pasti 1:1 dengan berkas</h3>
-          <p>Angka, kres/mol, titik oktaf, panjang ketukan, ikatan, triol, lirik, pergantian tangga nada, dan simbol akor yang tertulis. Diuji otomatis — <span class="mono" id="testCount">16/16</span> kasus lulus.</p>
+          <p>Dari berkas MusicXML: angka, kres/mol, titik oktaf, panjang ketukan, ikatan, triol, lirik, pergantian tangga nada, dan simbol akor yang tertulis. Diuji otomatis — <span class="mono" id="testCount">16/16</span> kasus lulus, dan 651 dari 653 partitur asli cocok 1:1.</p>
         </div>
         <div class="acc__col acc__col--maybe" data-reveal>
           <h3>Perlu diperiksa</h3>
-          <p>Pembacaan gambar (OMR) oleh mesin mana pun tidak bisa dijamin 100%. Karena itu ada <i>mode periksa</i>: gambar asli di samping hasil, birama yang jumlah ketukannya janggal ditandai ⚠, setiap angka bisa diklik untuk dikoreksi, dan tiap birama dicentang setelah dicek. Harmoni hasil <i>analisis</i> (garis putus-putus) adalah tafsiran musikal.</p>
+          <p>Pembacaan gambar (OMR) oleh mesin mana pun tidak bisa dijamin 100%. Mesin bawaan NOTASI, diuji pada 72 gambar piano: not tepat (nada + ketukan + durasi) ±96% pada partitur cetak bersih, ±91% hasil scan, ±81% foto ponsel; nadanya saja 95–98%. Karena itu ada <i>mode periksa</i>: gambar asli di samping hasil, birama janggal ditandai ⚠, setiap angka bisa diklik untuk dikoreksi, dan tiap birama dicentang setelah dicek. Harmoni hasil <i>analisis</i> (garis putus-putus) adalah tafsiran musikal.</p>
         </div>
       </div>
     </section>
@@ -220,7 +220,7 @@ V7   V7/V    ♭VII V7</pre>
     <!-- ============ DARI SCAN ============ -->
     <section class="scan" id="scan" aria-label="Dari scan ke MusicXML">
       <h2 class="scan__title" data-reveal>Dari foto<br>ke angka<em>.</em></h2>
-      <p class="scan__lede" data-reveal>Gambar JPG/PNG dibaca mesin <b>Audiveris</b> di server NOTASI, lalu dibuka di layar periksa berdampingan dengan gambar aslinya. Hasil terbaik: scan/foto tegak, terang merata, setara 300 dpi, satu halaman per gambar. Aplikasi lain yang bisa mengekspor MusicXML juga bisa dipakai:</p>
+      <p class="scan__lede" data-reveal>Gambar JPG/PNG dibaca oleh <b>mesin pembaca partitur bawaan NOTASI</b> langsung di browsermu — tanpa server, tanpa AI luar, tanpa unggahan. Hasil terbaik: partitur cetak, foto tegak lurus &amp; terang merata, setara scan 300 dpi, satu halaman per gambar. Untuk partitur yang sangat rumit, aplikasi lain yang mengekspor MusicXML juga bisa dipakai:</p>
       <figure class="scan__reveal" aria-hidden="true"><img alt="" src="" data-scan-img></figure>
       <ul class="scan__list">
         <li><a href="https://audiveris.github.io/audiveris/" target="_blank" rel="noopener" data-img="https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80&auto=format&fit=crop" data-cursor="Buka"><span class="scan__name">Audiveris</span><span class="scan__how mono">gratis · open source · PDF/gambar → .mxl</span></a></li>
@@ -252,6 +252,7 @@ V7   V7/V    ♭VII V7</pre>
   <script src="js/player.js"></script>
   <script src="js/editor.js"></script>
   <script src="js/vision.js"></script>
+  <script src="js/omr/omr-client.js"></script>
   <script src="js/demo.js"></script>
   <script src="js/main.js"></script>
 </body>

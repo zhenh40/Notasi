@@ -177,7 +177,7 @@
     document.documentElement.classList.toggle('omr-on', omrAvailable);
     return omrAvailable;
   }
-  checkOmr();
+  // status server hanya diperiksa bila mesin bawaan gagal (situs statis tidak punya /api)
 
   const isImg = f => /^image\/(png|jpeg)$/.test(f.type) || /\.(png|jpe?g)$/i.test(f.name);
   let visionAbort = null;
@@ -186,7 +186,6 @@
   async function handleImages(files) {
     files = files.filter(isImg);
     if (!files.length) return;
-    if (omrAvailable === null) await checkOmr();
     const urls = files.map(f => URL.createObjectURL(f));
     const fail = (err) => {
       console.error(err);
@@ -194,7 +193,33 @@
       showNotice('<b>Gambar tidak berhasil dibaca.</b> ' + escapeHtml(err.message || err) + '<br>Tips: foto tegak lurus, terang merata, tidak miring/terlipat, resolusi tinggi (setara scan 300 dpi).', true);
     };
 
-    // Jalur 1 (website yang kamu deploy): server membaca foto lewat Claude API
+    // Jalur utama: mesin pembaca partitur bawaan, berjalan di browser (tanpa server, tanpa AI luar)
+    if (window.NotasiOMRClient && window.NOTASI_ENGINE !== 'server') {
+      const t0 = Date.now();
+      let last = { page: 1, pages: files.length, step: 'memulai' };
+      const msg = () => showNotice(`<b>Membaca partitur dari gambar…</b> <span class="omr-spin"></span> ${files.length > 1 ? `halaman ${last.page}/${last.pages} · ` : ''}${escapeHtml(last.step || '')} · ${Math.round((Date.now() - t0) / 1000)} dtk<br><span class="mono">diproses di perangkatmu sendiri · tidak diunggah ke mana pun</span>`);
+      msg();
+      const timer = setInterval(msg, 500);
+      try {
+        const { data, warnings } = await NotasiOMRClient.recognize(files, (pr) => { last = pr; });
+        clearInterval(timer);
+        const { xml, problems } = NotasiVision.buildPianoXML(data);
+        load(xml, { images: urls, fromImage: true });
+        const notes = warnings.concat(problems);
+        const flagged = state.result ? state.result.measures.filter(m => m.rhythmWarn && m.rhythmWarn.length).length : 0;
+        showNotice(`<b>Selesai dalam ${Math.round((Date.now() - t0) / 1000)} detik.</b> Periksa hasilnya di samping gambar asli: klik angka untuk membetulkan, klik nomor birama untuk menandai sudah dicek.` +
+          (flagged ? ` <b>${flagged} birama</b> jumlah ketukannya janggal (ditandai ⚠) — periksa itu lebih dulu.` : '') +
+          (notes.length ? '<br>' + notes.slice(0, 4).map(escapeHtml).join('<br>') : ''));
+        return;
+      } catch (err) {
+        clearInterval(timer);
+        // bila server pembaca lain tersedia, coba itu; jika tidak, tampilkan galat
+        if (omrAvailable === null && location.protocol.startsWith('http')) await checkOmr();
+        if (!serverStatus.vision && !omrAvailable) { fail(err); return; }
+      }
+    } else if (omrAvailable === null && location.protocol.startsWith('http')) await checkOmr();
+
+    // Jalur cadangan (opsional, bila dipasang di server): Claude API
     if (serverStatus.vision) {
       if (visionAbort) visionAbort.abort();
       visionAbort = new AbortController();
@@ -244,7 +269,8 @@
       return;
     }
 
-    if (await NotasiVision.available()) {
+    // (opsional, hanya bila diminta pemilik situs) Claude di dalam artifact
+    if (window.NOTASI_ENGINE === 'claude' && await NotasiVision.available()) {
       if (visionAbort) visionAbort.abort();
       visionAbort = new AbortController();
       const t0 = Date.now();
@@ -268,7 +294,7 @@
     }
 
     urls.forEach(u => URL.revokeObjectURL(u));
-    showNotice(`<b>Pembaca gambar tidak tersedia di sini.</b> Buka NOTASI lewat link artifact Claude (gambar dibaca oleh Claude), atau jalankan versi Docker dengan Audiveris (<span class="mono">docker run -p 8000:8000 notasi</span>). Berkas MusicXML tetap bisa langsung dipakai.`, true);
+    showNotice('<b>Browser ini belum bisa menjalankan pembaca gambar.</b> Coba Chrome, Edge, Firefox, atau Safari versi terbaru. Berkas MusicXML tetap bisa langsung dipakai.', true);
   }
 
   async function handleFile(file) {
